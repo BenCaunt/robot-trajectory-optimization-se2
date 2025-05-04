@@ -16,7 +16,7 @@ import rerun as rr
 # ------------------------------------------------------------
 r, lx, ly = 0.05, 0.20, 0.15            # wheel radius & chassis half-sizes
 dt, N = 0.1, 500                         # sample time & horizon
-v_max, v_min = 20.0, -40.0              # wheel-speed limits
+v_max, v_min = 20.0, -20.0              # wheel-speed limits
 a_max = 5.0                            # wheel accel limits
 goal_pose = ca.DM([1.5, 1.0, np.pi/2])  # x, y, θ target
 
