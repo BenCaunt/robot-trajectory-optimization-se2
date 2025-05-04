@@ -12,6 +12,7 @@ import casadi as ca
 import argparse
 import utils         # Import helper functions
 import visualization # Import Rerun logging functions
+from utils import Obstacle # Import the Obstacle dataclass
 
 
 # ------------------------------------------------------------
@@ -23,16 +24,16 @@ v_max, v_min = 20.0, -20.0              # wheel-speed limits (m/s)
 a_max = 5.0                            # wheel accel limits (m/s)
 goal_pose = ca.DM([1.8, 1.2, np.pi/2])  # x, y, θ target (m, m, rad)
 
-# Obstacles: (x, y, w, h, yaw)  – yaw in *radians*
+# Obstacles: Instantiate Obstacle dataclasses
 obstacles = [
-    (0.80, 0.50, 0.40, 0.30, 0.40),    # 23° turned
-    (1.10, 1.20, 0.30, 0.30, -0.30),   # −17°
-    (1.50, 0.5, 0.4, 0.3, 0.4)
+    Obstacle(x=0.80, y=0.50, width=0.40, height=0.30, yaw=0.40),    # 23° turned
+    Obstacle(x=1.10, y=1.20, width=0.30, height=0.30, yaw=-0.30),   # −17°
+    Obstacle(x=1.50, y=0.50, width=0.40, height=0.30, yaw=0.40)
 ]
 
-# Calculate bounding radii
+# Calculate bounding radii and robot shape
 robot_width, robot_length = 0.40, 0.30
-obs_R = [0.5 * np.hypot(w, h) for _, _, w, h, _ in obstacles]
+# obs_R = [0.5 * np.hypot(w, h) for _, _, w, h, _ in obstacles] # No longer needed
 R_robot = 0.5 * np.hypot(robot_width, robot_length)
 robot_half_size = np.array([robot_width / 2, robot_length / 2], np.float32)
 
@@ -55,7 +56,8 @@ else:
 # ------------------------------------------------------------
 # Perform Initial Goal Validation
 # ------------------------------------------------------------
-if not utils.is_valid_goal(goal_pose, obstacles, R_robot, obs_R):
+# Pass the list of Obstacle objects directly
+if not utils.is_valid_goal(goal_pose, obstacles, R_robot):
     raise ValueError("Initial goal pose is invalid due to collision with an obstacle.")
 else:
     print("Initial goal pose is valid.")
@@ -95,10 +97,10 @@ for k in range(N):
 
     # --- Obstacle Avoidance ---
     px, py = p_k_plus_1[0], p_k_plus_1[1]
-    # Iterate through obstacles and their bounding radii
-    for (ox, oy, _, _, _), R_o in zip(obstacles, obs_R):
-        # Use ox, oy directly from the unpacked tuple
-        d = ca.sqrt((px - ox)**2 + (py - oy)**2) - (R_robot + R_o)
+    # Iterate through Obstacle objects
+    for obstacle in obstacles:
+        # Use attributes from the Obstacle dataclass
+        d = ca.sqrt((px - obstacle.x)**2 + (py - obstacle.y)**2) - (R_robot + obstacle.radius)
         opti.subject_to(d >= 5e-2)
         opti.minimize(-0.02 * ca.log(d))
 
@@ -131,8 +133,8 @@ X_val = np.array(sol.value(X))  # (7, N+1)
 visualization.init_rerun()
 visualization.log_static_scene(
     goal_pose=goal_pose,
-    obstacles=obstacles,
-    obs_R=obs_R,
+    obstacles=obstacles, # Pass the list of Obstacle objects
+    # obs_R=obs_R, # No longer needed
     robot_half_size=robot_half_size
 )
 

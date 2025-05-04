@@ -1,6 +1,7 @@
 import rerun as rr
 import numpy as np
 import utils # Assuming utils.py contains generate_circle_points
+from utils import Obstacle # Import the Obstacle dataclass
 
 
 def init_rerun(name="mecanum_mpc_rotated"):
@@ -9,8 +10,7 @@ def init_rerun(name="mecanum_mpc_rotated"):
 
 def log_static_scene(
     goal_pose,
-    obstacles,
-    obs_R,
+    obstacles: list[Obstacle], # Expect a list of Obstacle objects
     robot_half_size
 ):
     """Log static elements like goal, obstacles, and robot shape."""
@@ -34,15 +34,15 @@ def log_static_scene(
     )
 
     # ---- Log obstacles with static Transform3D + box + circle ----
-    for i, (ox, oy, w, h, yaw) in enumerate(obstacles):
+    for i, obstacle in enumerate(obstacles):
         path = f"world/obstacles/obs{i}"
 
         # Log transform (static)
         rr.log(
             path,
             rr.Transform3D(
-                translation=[ox, oy, 0.0],
-                rotation=rr.RotationAxisAngle((0, 0, 1), radians=float(yaw)),
+                translation=[obstacle.x, obstacle.y, 0.0],
+                rotation=rr.RotationAxisAngle((0, 0, 1), radians=float(obstacle.yaw)),
             ),
             static=True,
         )
@@ -52,13 +52,13 @@ def log_static_scene(
             f"{path}/box",
             rr.Boxes2D(
                 centers=[[0, 0]],
-                half_sizes=[[w / 2, h / 2]],
+                half_sizes=[[obstacle.width / 2, obstacle.height / 2]],
             ),
             static=True,
         )
 
         # Log bounding circle (static, child path)
-        circle_pts = utils.generate_circle_points(0, 0, obs_R[i])
+        circle_pts = utils.generate_circle_points(0, 0, obstacle.radius)
         rr.log(
             f"{path}/bounding_circle",
             rr.LineStrips2D([circle_pts.astype(np.float32)], colors=[[255, 255, 0, 128]]), # Yellow

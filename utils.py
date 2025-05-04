@@ -1,5 +1,20 @@
 import numpy as np
 import casadi as ca
+from dataclasses import dataclass
+
+@dataclass
+class Obstacle:
+    """Represents a rectangular obstacle with pose and dimensions."""
+    x: float
+    y: float
+    width: float
+    height: float
+    yaw: float
+    radius: float = 0.0 # Will be calculated in __post_init__
+
+    def __post_init__(self):
+        """Calculate the bounding radius after initialization."""
+        self.radius = 0.5 * np.hypot(self.width, self.height)
 
 # ------------------------------------------------------------
 # SE(2) Helper Functions (CasADi)
@@ -107,16 +122,16 @@ def body_twist_tank(w, r, ly):
 # ------------------------------------------------------------
 # Validation Function
 # ------------------------------------------------------------
-def is_valid_goal(goal_pose, obstacles, R_robot, obs_R):
+def is_valid_goal(goal_pose, obstacles: list[Obstacle], R_robot):
     """Checks if the goal pose is collision-free w.r.t obstacle bounding circles."""
     goal_x, goal_y = float(goal_pose[0]), float(goal_pose[1])
-    for i, (ox, oy, *_) in enumerate(obstacles):
-        dist_sq = (goal_x - ox)**2 + (goal_y - oy)**2
-        min_dist_sq = (R_robot + obs_R[i])**2
+    for i, obstacle in enumerate(obstacles):
+        dist_sq = (goal_x - obstacle.x)**2 + (goal_y - obstacle.y)**2
+        min_dist_sq = (R_robot + obstacle.radius)**2
         if dist_sq < min_dist_sq:
             print(f"Collision detected between goal and obstacle {i}!")
             print(f"  Goal: ({goal_x:.2f}, {goal_y:.2f}), Robot Radius: {R_robot:.2f}")
-            print(f"  Obstacle {i}: ({ox:.2f}, {oy:.2f}), Obstacle Radius: {obs_R[i]:.2f}")
+            print(f"  Obstacle {i}: ({obstacle.x:.2f}, {obstacle.y:.2f}), Obstacle Radius: {obstacle.radius:.2f}")
             print(f"  Distance: {np.sqrt(dist_sq):.2f}, Required: {np.sqrt(min_dist_sq):.2f}")
             return False
     return True 
