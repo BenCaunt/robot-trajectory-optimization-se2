@@ -1,0 +1,11 @@
+[project]
+name = "mecanum-drive-trajectory-generation"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "casadi>=3.7.0",
+    "numpy>=2.2.5",
+    "rerun-sdk>=0.23.1",
+]

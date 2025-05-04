@@ -1,0 +1,8 @@
+README.md
+main.py
+pyproject.toml
+mecanum_drive_trajectory_generation.egg-info/PKG-INFO
+mecanum_drive_trajectory_generation.egg-info/SOURCES.txt
+mecanum_drive_trajectory_generation.egg-info/dependency_links.txt
+mecanum_drive_trajectory_generation.egg-info/requires.txt
+mecanum_drive_trajectory_generation.egg-info/top_level.txt
