@@ -20,8 +20,8 @@ from utils import Obstacle # Import the Obstacle dataclass
 # ------------------------------------------------------------
 r, lx, ly = 0.05, 0.20, 0.15            # wheel radius & chassis half-sizes (m)
 dt, N = 0.1, 500                         # sample time & horizon (s) - Reduced N for quicker testing
-v_max, v_min = 20.0, -20.0              # wheel-speed limits (m/s)
-a_max = 5.0                            # wheel accel limits (m/s)
+v_max, v_min = 40.0, -40.0              # wheel-speed limits (rad/s)
+a_max = 5.0                            # wheel accel limits (rad/s^2)
 goal_pose = ca.DM([1.8, 1.2, np.pi/2])  # x, y, θ target (m, m, rad)
 
 # Obstacles: Instantiate Obstacle dataclasses
