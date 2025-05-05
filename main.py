@@ -105,7 +105,7 @@ for k in range(N):
         opti.minimize(-0.02 * ca.log(d))
 
 # --- Cost Function ---
-Qp, Qw, R = np.diag([25, 25, 35]), 0.15 * np.eye(4), 0.01 * np.eye(4)
+Qp, Qw, R = np.diag([25, 25, 35]), 0.01* np.eye(4), 0.01 * np.eye(4)
 obj = 0
 for k in range(N):
     e = X[0:3, k] - goal_pose
